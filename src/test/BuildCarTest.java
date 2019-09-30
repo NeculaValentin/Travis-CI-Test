@@ -1,170 +1,108 @@
 package test;
+
 import buildcar.*;
+
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 import org.junit.*;
 
 public class BuildCarTest {
 
+  @Test
+  public void testPiccolo() throws Exception {
+    test(7, 12);
+  }
 
-    @Test
-    public void testBodyComponent() throws Exception {
-        BuildCar car = new BuildCar(7, 1);
-        assertNotNull("'Car.body.component' is not defined", car.body.component);
+  @Test
+  public void testMedio() throws Exception {
+    test(13, 25);
+  }
+
+  @Test
+  public void testGrande() throws Exception {
+    test(25, 35);
+  }
+
+  @Test
+  public void testBody() throws Exception {
+    BuildCar car = new BuildCar(8, 1);
+  } // TEST BODY
+
+  @Test
+  public void testChassis() throws Exception {
+    BuildCar car = new BuildCar(8, 1);
+  } // TEST CHASSIS
+
+  @Test(expected = java.lang.Exception.class)
+  public void testLengthException() throws Exception {
+    BuildCar car = new BuildCar(2, 1);
+  } // TEST LUNGHEZZA PICCOLA
+
+  @Test(expected = java.lang.Exception.class)
+  public void testNoDoorException() throws Exception {
+    BuildCar car = new BuildCar(12, 0);
+  } // TEST SENZA PORTE
+
+  private int[] randomArgs(int minLength, int maxLength) {
+    int randomLength = (int) Math.ceil(Math.random() * (maxLength - minLength)) + minLength;
+    int maxDoors = (int) Math.ceil(Math.random() * Math.floor((randomLength - 3) / 2));
+    return new int[] {randomLength, maxDoors};
+  } // METODO CHE IMPLEMENTA I VALORI RANDOM
+
+  public static class Car {
+    Body body;
+    Chassis chassis;
+
+    Car(int length, int doors) throws Exception {
+      if (length < 7 || doors < 1 || doors * 2 > length - 3) throw new Exception();
+      body = new Body(length, doors);
+      chassis = new Chassis(length, doors);
     }
+  }
 
-    // test chassis.component
-    @Test
-    public void testChassisComponent() throws Exception {
-        BuildCar car = new BuildCar(7, 1);
-        assertNotNull("'Car.chassis.component' is not defined", car.chassis.component);
+  static class Body {
+    String component;
+
+    Body(int length, int doors) {
+      int left = doors / 2;
+      int right = doors - left;
+      component = " ";
+      for (int i = 0; i < length - 3; i++) component += "_";
+      component += "\n|";
+      for (int i = 0; i < left; i++) component += "[]";
+      for (int i = 0; i < length - 3 - doors * 2; i++) component += " ";
+      for (int i = 0; i < right; i++) component += "[]";
+      component += "\\\n";
     }
+  }
 
-    // test length-exception
-    @Test(expected = java.lang.Exception.class)
-    public void testLengthException() throws Exception {
-        BuildCar car = new BuildCar(3, 1);
+  static class Chassis {
+    String component;
+
+    Chassis(int length, int doors) {
+      component = "";
+      int chassies = 2;
+      if (length > 11) chassies += (length - 10) / 2;
+      int right = chassies / 2;
+      int left = chassies - right;
+      for (int i = 0; i < left; i++) component += "-o";
+      for (int i = 0; i < length - 2 * chassies - 2; i++) component += "-";
+      for (int i = 0; i < right; i++) component += "-o";
+      component += "-'";
     }
+  }
 
-    ;
-
-    // test no-door-exceptions
-    @Test(expected = java.lang.Exception.class)
-    public void testNoDoorException() throws Exception {
-        BuildCar car = new BuildCar(7, 0);
+  private void test(int min, int max) throws Exception {
+    for (int i = 0; i < 10; i++) {
+      int[] dati = randomArgs(min, max);
+      Car carSolution = new Car(dati[0], dati[1]);
+      BuildCar car = new BuildCar(dati[0], dati[1]);
+      String carString = car.body.component + car.chassis.component;
+      String carTestString = carSolution.body.component + carSolution.chassis.component;
+      assertEquals(carString, carTestString); // test
+      System.out.println();
+      // String output = "\nMacchina reale:\n" + test + "\nLa tua macchina:\n" + value + "\n\n";
+      // System.out.println(output);
     }
-
-    ;
-
-    // test too-many-doors-exception
-    @Test(expected = java.lang.Exception.class)
-    public void testManyDoorsException() throws Exception {
-        int[] args = randomArgs(7, 30);
-        BuildCar car = new BuildCar(args[0], args[0] / 2);
-    }
-
-    ;
-
-    // test small cars
-    @Test
-    public void testSmallCars() {
-        testCars(7, 11);
-    }
-
-    // test medium cars
-    @Test
-    public void testMediumCars() {
-        testCars(12, 20);
-    }
-
-    // test large cars
-    @Test
-    public void testLargeCars() {
-        testCars(20, 30);
-    }
-
-    // method for random arguments
-    private int[] randomArgs(int minLength, int maxLength) {
-        int randomLength = (int) Math.ceil(Math.random() * (maxLength - minLength)) + minLength;
-        int maxDoors = (int) Math.ceil(Math.random() * Math.floor((randomLength - 3) / 2));
-        return new int[]{randomLength, maxDoors};
-    }
-
-    // testing method
-    public void testCars(int min, int max) {
-        int[] args;
-        BuildCar car;
-        CarSolution carSolution;
-        String value, test, output;
-        for (int i = 0; i < 5; i++) {
-            args = randomArgs(min, max);
-            try {
-                car = new BuildCar(args[0], args[1]);
-                carSolution = new CarSolution(args[0], args[1]);
-            } catch (Exception err) {
-                System.out.println("Exception caught! Failed! " + err);
-                return;
-            }
-            value = car.body.component + car.chassis.component;
-            test = carSolution.body.component + carSolution.chassis.component;
-            output = "\nExpected car:\n" + test + "\nYour car:\n" + value + "\n\n";
-            assertEquals(output, value, test); // test
-            System.out.println(output);
-        }
-    }
-
-    // CarSolution
-    private static class CarSolution {
-        public final Body body;
-        public final Chassis chassis;
-        private final int doors;
-        private final int length;
-
-        public CarSolution(int length, int doors) throws Exception {
-            if (doors < 1) throw new Exception("How can I enter it?");
-            if ((doors * 2) > length - 3) throw new Exception("Too many doors.");
-            if (length < 7) throw new Exception("I cannot build that small car.");
-
-            this.doors = doors;
-            this.length = length;
-            this.body = new Body(getBody());
-            this.chassis = new Chassis(getChassis());
-        }
-
-        private String getBody() {
-            final String[] PARTS = new String[]{"_", "|", "[]", "\\"};
-            String bodyLeft = PARTS[1], bodyRight = "", roof = " ";
-            boolean left = false;
-            int door = 0;
-
-            for (int i = 1; i < length - 2; i++) roof += PARTS[0];
-            for (int i = 0; i < length - 3; i++) {
-                if (i % 2 == 0) {
-                    door++;
-                    i++;
-                    if (left == true) bodyLeft += PARTS[2];
-                    else bodyRight += PARTS[2];
-                    left = !left;
-                }
-                if (door == doors) {
-                    while (bodyRight.length() + bodyLeft.length() != (length - 2)) bodyLeft += " ";
-                    break;
-                }
-            }
-            return (roof + "\n" + bodyLeft + bodyRight + PARTS[3] + "\n");
-        }
-
-        private String getChassis() {
-            final String[] PARTS = new String[]{"-o", "o-", "-", "'"};
-            String componentRear = PARTS[0], componentMiddle = "", componentFront = PARTS[1];
-            boolean rear = true;
-
-            for (int i = length - 5; i > 0; i--) {
-                if (i >= 7) {
-                    i--;
-                    if (rear) componentRear += PARTS[0];
-                    else componentFront += PARTS[1];
-                    rear = !rear;
-                } else componentMiddle += PARTS[2];
-            }
-            return componentRear + componentMiddle + componentFront + PARTS[3];
-        }
-
-        public class Body {
-            public final String component;
-
-            public Body(String component) {
-                this.component = component;
-            }
-        }
-
-        public class Chassis {
-            public final String component;
-
-            public Chassis(String component) {
-                this.component = component;
-            }
-        }
-    }
+  }
 }

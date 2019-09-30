@@ -7,9 +7,11 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="Travis-CI-Test" />
+        <module name="BuildCar" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="BuildCar" target="1.7" />
       <module name="Travis-CI-Test" target="11" />
     </bytecodeTargetLevel>
   </component>
